@@ -4,7 +4,7 @@
 ROLE_NAME="ADMIN1"
 USER1="LabUser1"
 USER2="LabUser2"
-COMMON_PASSWORD="iamapassword" # Common password for both users
+COMMON_PASSWORD="iamaPassword$3" # Common password for both users
 
 # Trust policy that allows all AWS IAM users to assume the role
 TRUST_POLICY='{
