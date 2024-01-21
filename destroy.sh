@@ -38,4 +38,8 @@ delete_user() {
 delete_user $USER1
 delete_user $USER2
 
+# Remove the script directory
+rm -rf AWS-Admin-Role-Creation-Script/
+
 echo "Role $ROLE_NAME and users $USER1, $USER2 along with their policies and access keys have been deleted."
+echo "AWS-Admin-Role-Creation-Script directory has been removed."
