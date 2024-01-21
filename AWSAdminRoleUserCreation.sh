@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Define the role and user names
+# Define the role, user names, and policy name
 ROLE_NAME="ADMIN1"
 USER1="LabUser1"
 USER2="LabUser2"
-COMMON_PASSWORD="iamaPassword=-" # Common password for both users
+COMMON_PASSWORD="iamaPassword$3" # Common password for both users
+GET_SESSION_TOKEN_POLICY_NAME="GetSessionTokenPolicy"
 
 # Trust policy that allows all AWS IAM users to assume the role
 TRUST_POLICY='{
@@ -14,6 +15,18 @@ TRUST_POLICY='{
       "Effect": "Allow",
       "Principal": {"AWS": "*"},
       "Action": "sts:AssumeRole"
+    }
+  ]
+}'
+
+# Policy that allows sts:GetSessionToken
+GET_SESSION_TOKEN_POLICY='{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:GetSessionToken",
+      "Resource": "*"
     }
   ]
 }'
@@ -32,6 +45,13 @@ aws iam create-user --user-name $USER2
 aws iam attach-user-policy --user-name $USER1 --policy-arn arn:aws:iam::aws:policy/AWSCloudShellFullAccess
 aws iam attach-user-policy --user-name $USER2 --policy-arn arn:aws:iam::aws:policy/AWSCloudShellFullAccess
 
+# Create custom policy for sts:GetSessionToken
+aws iam create-policy --policy-name $GET_SESSION_TOKEN_POLICY_NAME --policy-document "$GET_SESSION_TOKEN_POLICY"
+
+# Attach the custom GetSessionToken policy to both users
+aws iam attach-user-policy --user-name $USER1 --policy-arn arn:aws:iam::aws:policy/$GET_SESSION_TOKEN_POLICY_NAME
+aws iam attach-user-policy --user-name $USER2 --policy-arn arn:aws:iam::aws:policy/$GET_SESSION_TOKEN_POLICY_NAME
+
 # Generate access keys for LabUser1 and LabUser2
 aws iam create-access-key --user-name $USER1
 aws iam create-access-key --user-name $USER2
@@ -40,5 +60,4 @@ aws iam create-access-key --user-name $USER2
 aws iam create-login-profile --user-name $USER1 --password $COMMON_PASSWORD --no-password-reset-required
 aws iam create-login-profile --user-name $USER2 --password $COMMON_PASSWORD --no-password-reset-required
 
-echo "Role $ROLE_NAME created with AdministratorAccess."
-echo "Users $USER1 and $USER2 created with AWSCloudShellFullAccess policy, access keys, and console access."
+echo "Role $ROLE_NAME and users $USER1, $USER2 created with necessary policies and access."
