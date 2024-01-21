@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Define the role, user names, and policy name
+# Define the role and user names
 ROLE_NAME="ADMIN1"
 USER1="LabUser1"
 USER2="LabUser2"
-COMMON_PASSWORD="iamaPassword$3" # Common password for both users
-GET_SESSION_TOKEN_POLICY_NAME="GetSessionTokenPolicy"
+COMMON_PASSWORD="iamaPassword=-" # Common password for both users
 
 # Trust policy that allows all AWS IAM users to assume the role
 TRUST_POLICY='{
@@ -19,7 +18,7 @@ TRUST_POLICY='{
   ]
 }'
 
-# Policy that allows sts:GetSessionToken
+# Inline policy that allows sts:GetSessionToken
 GET_SESSION_TOKEN_POLICY='{
   "Version": "2012-10-17",
   "Statement": [
@@ -45,12 +44,9 @@ aws iam create-user --user-name $USER2
 aws iam attach-user-policy --user-name $USER1 --policy-arn arn:aws:iam::aws:policy/AWSCloudShellFullAccess
 aws iam attach-user-policy --user-name $USER2 --policy-arn arn:aws:iam::aws:policy/AWSCloudShellFullAccess
 
-# Create custom policy for sts:GetSessionToken
-aws iam create-policy --policy-name $GET_SESSION_TOKEN_POLICY_NAME --policy-document "$GET_SESSION_TOKEN_POLICY"
-
-# Attach the custom GetSessionToken policy to both users
-aws iam attach-user-policy --user-name $USER1 --policy-arn arn:aws:iam::aws:policy/$GET_SESSION_TOKEN_POLICY_NAME
-aws iam attach-user-policy --user-name $USER2 --policy-arn arn:aws:iam::aws:policy/$GET_SESSION_TOKEN_POLICY_NAME
+# Put inline policy to allow sts:GetSessionToken for both users
+aws iam put-user-policy --user-name $USER1 --policy-name GetSessionTokenPolicy --policy-document "$GET_SESSION_TOKEN_POLICY"
+aws iam put-user-policy --user-name $USER2 --policy-name GetSessionTokenPolicy --policy-document "$GET_SESSION_TOKEN_POLICY"
 
 # Generate access keys for LabUser1 and LabUser2
 aws iam create-access-key --user-name $USER1
